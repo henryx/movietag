@@ -1,0 +1,50 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+"""
+Copyright (C) 2014 Enrico Bianchi (enrico.bianchi@gmail.com)
+Project       MovieTAG
+Description   A movie tagging system
+License       GPL version 2 (see GPL.txt for details)
+"""
+
+import argparse
+import json
+import os
+import sys
+import urllib
+
+def init_args():
+    args = argparse.ArgumentParser(description="MovieTAG")
+    args.add_argument("-r", "--root", metavar="<directory>",
+                      help="Define root diretory")
+    args.add_argument("movie", metavar="movie", type=str,
+                      help="movie name")
+
+    return args
+
+def check_structure(root):
+    pass
+
+def find_movie(query):
+    url = "www.omdbapi.com"
+
+    params = urllib.urlencode({'s': query})
+    connection = httplib.HTTPConnection(url)
+
+    connection.request("GET", "/?" + params)
+    response = connection.getresponse()
+
+    data = response.read()
+
+    return json.loads(data)
+
+if __name__ == "__main__":
+    args = init_args().parse_args(sys.argv[1:])
+
+    if not args.root:
+        root = os.path.sep.join([os.path.expanduser('~'), "Videos"])
+    else:
+        root = args.root
+
+    check_structure(root)
