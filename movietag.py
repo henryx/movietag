@@ -24,7 +24,17 @@ def init_args():
     return args
 
 def check_structure(root):
-    pass
+    subdirs = [
+        "By Actor",
+        "By Director",
+        "By Name",
+        "By Genre",
+        "By Year"
+        ]
+
+    for directory in subdirs:
+        if not os.path.isdir(root + os.sep + directory):
+            os.makedirs(root + os.sep + directory)
 
 def find_movie(query):
     url = "www.omdbapi.com"
