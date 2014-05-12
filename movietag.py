@@ -38,6 +38,12 @@ def check_structure(root):
             os.makedirs(root + os.sep + directory)
 
 def find_movie(query, search="s"):
+    """
+        Possible values:
+            "s": search for title
+            "t": extract by title
+            "i": extract by id
+    """
     url = "www.omdbapi.com"
 
     params = urllib.urlencode({search: query})
@@ -59,4 +65,3 @@ if __name__ == "__main__":
         root = args.root
 
     check_structure(root)
-
