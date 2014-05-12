@@ -9,6 +9,7 @@ License       GPL version 2 (see GPL.txt for details)
 """
 
 import argparse
+import httplib
 import json
 import os
 import sys
