@@ -36,10 +36,10 @@ def check_structure(root):
         if not os.path.isdir(root + os.sep + directory):
             os.makedirs(root + os.sep + directory)
 
-def find_movie(query):
+def find_movie(query, search="s"):
     url = "www.omdbapi.com"
 
-    params = urllib.urlencode({'s': query})
+    params = urllib.urlencode({search: query})
     connection = httplib.HTTPConnection(url)
 
     connection.request("GET", "/?" + params)
@@ -58,3 +58,4 @@ if __name__ == "__main__":
         root = args.root
 
     check_structure(root)
+
