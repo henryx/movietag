@@ -21,7 +21,6 @@ def init_args():
                       help="Define root diretory")
     args.add_argument("movie", metavar="movie", type=str,
                       help="movie name")
-
     return args
 
 def check_structure(root):
@@ -31,7 +30,7 @@ def check_structure(root):
         "By Name",
         "By Genre",
         "By Year"
-        ]
+    ]
 
     for directory in subdirs:
         if not os.path.isdir(root + os.sep + directory):
@@ -65,3 +64,7 @@ if __name__ == "__main__":
         root = args.root
 
     check_structure(root)
+    query = raw_input("Movie to search: ")
+
+    print
+    find_movie(query)
