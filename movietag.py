@@ -20,7 +20,7 @@ def init_args():
     args.add_argument("-r", "--root", metavar="<directory>",
                       help="Define root diretory")
     args.add_argument("movie", metavar="movie", type=str,
-                      help="movie name")
+                      help="movie file")
     return args
 
 def check_structure(root):
@@ -36,19 +36,19 @@ def check_structure(root):
         if not os.path.isdir(root + os.sep + directory):
             os.makedirs(root + os.sep + directory)
 
-def find_movie(query, search="s"):
+def find_movie(movie):
     """
         Possible values:
             "s": search for title
             "t": extract by title
             "i": extract by id
     """
-    url = "www.omdbapi.com"
+    url = "www.myapifilms.com"
 
-    params = urllib.urlencode({search: query})
+    params = urllib.urlencode({"title": query, "format": "JSON"})
     connection = httplib.HTTPConnection(url)
 
-    connection.request("GET", "/?" + params)
+    connection.request("GET", "/search?" + params)
     response = connection.getresponse()
 
     data = response.read()
@@ -66,5 +66,4 @@ if __name__ == "__main__":
     check_structure(root)
     query = raw_input("Movie to search: ")
 
-    print
-    find_movie(query)
+    print find_movie(query)
