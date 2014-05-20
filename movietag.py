@@ -36,16 +36,15 @@ def check_structure(root):
         if not os.path.isdir(root + os.sep + directory):
             os.makedirs(root + os.sep + directory)
 
-def find_movie(movie):
+def find_movie(movie, actors="N"):
     """
-        Possible values:
-            "s": search for title
-            "t": extract by title
-            "i": extract by id
+        Values:
+            "movie": search movie
+            "actors": extract actors (N = none; S = simple; F = full: default N)
     """
     url = "www.myapifilms.com"
 
-    params = urllib.urlencode({"title": query, "format": "JSON"})
+    params = urllib.urlencode({"title": query, "format": "JSON", "actors": actors})
     connection = httplib.HTTPConnection(url)
 
     connection.request("GET", "/search?" + params)
