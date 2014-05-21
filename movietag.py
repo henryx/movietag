@@ -18,9 +18,11 @@ import urllib
 def init_args():
     args = argparse.ArgumentParser(description="MovieTAG")
     args.add_argument("-r", "--root", metavar="<directory>",
-                      help="Define root diretory")
+                      help="Define root directory")
+    args.add_argument("-q", "--query", metavar="<search>",
+                      help="Movie to search")
     args.add_argument("movie", metavar="movie", type=str,
-                      help="movie file")
+                      help="Movie file")
     return args
 
 def check_structure(root):
@@ -63,6 +65,10 @@ if __name__ == "__main__":
         root = args.root
 
     check_structure(root)
-    query = raw_input("Movie to search: ")
+
+    if not args.query:
+        query = raw_input("Movie to search: ")
+    else:
+        query = args.query
 
     print find_movie(query)
