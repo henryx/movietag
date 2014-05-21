@@ -47,7 +47,15 @@ def find_movie(movie, actors="N", limit=1):
     """
     url = "www.myapifilms.com"
 
-    params = urllib.urlencode({"title": movie, "format": "JSON", "actors": actors, "limit": limit})
+    info = {
+        "format": "JSON",
+        "aka": 1,
+        "title": movie,
+        "actors": actors,
+        "limit": limit
+    }
+
+    params = urllib.urlencode(info)
     connection = httplib.HTTPConnection(url)
 
     connection.request("GET", "/search?" + params)
