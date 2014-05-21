@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -9,7 +9,7 @@ License       GPL version 2 (see GPL.txt for details)
 """
 
 import argparse
-import httplib
+import http.client
 import json
 import os
 import sys
@@ -55,13 +55,13 @@ def find_movie(movie, actors="N", limit=1):
         "limit": limit
     }
 
-    params = urllib.urlencode(data)
-    connection = httplib.HTTPConnection(url)
+    params = urllib.parse.urlencode(data)
+    connection = http.client.HTTPConnection(url)
 
     connection.request("GET", "/search?" + params)
     response = connection.getresponse()
 
-    return json.loads(response.read())
+    return json.loads(response.read().decode("utf-8"))
 
 if __name__ == "__main__":
     args = init_args().parse_args(sys.argv[1:])
@@ -74,8 +74,8 @@ if __name__ == "__main__":
     check_structure(root)
 
     if not args.query:
-        query = raw_input("Movie to search: ")
+        query = input("Movie to search: ")
     else:
         query = args.query
 
-    print find_movie(query)
+    print(find_movie(query))
