@@ -15,6 +15,56 @@ import os
 import sys
 import urllib
 
+from sqlite3 import dbapi2 as sqlite
+
+class Database():
+    _commit = None
+    _conn = None
+    _path = None
+
+    def __init__(self, path, commit=True):
+        self._path = path
+        self._commit = commit
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        try:
+            if self._conn:
+                if self._commit:
+                    self._conn.commit()
+                else:
+                    self._conn.rollback()
+                self._conn.close()
+        except:
+            pass
+
+    def _check_database(self, connection):
+        cursor = connection.cursor()
+        cursor.execute("select count(*) from sqlite_master")
+
+        value = cursor.fetchone()[0]
+        cursor.close()
+
+        if value == 0:
+            return False
+        else:
+            return True
+
+    def _create_database(self, connection):
+        # TODO: write database schema
+        cursor = connection.cursor()
+        pass
+
+    @property
+    def connection(self):
+        self._conn = sqlite.connect(self._path)
+
+        if not self._check_database(self._conn):
+            self._create_database(self._conn)
+        return self._conn
+
 def init_args():
     args = argparse.ArgumentParser(description="MovieTAG")
     args.add_argument("-r", "--root", metavar="<directory>",
