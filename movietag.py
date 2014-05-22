@@ -113,8 +113,8 @@ def find_movie(movie, actors="N", limit=1):
 
     return json.loads(response.read().decode("utf-8"))
 
-if __name__ == "__main__":
-    args = init_args().parse_args(sys.argv[1:])
+def run(arguments):
+    args = init_args().parse_args(arguments)
 
     if not args.root:
         root = os.path.sep.join([os.path.expanduser('~'), "Videos"])
@@ -129,3 +129,5 @@ if __name__ == "__main__":
         query = args.query
 
     print(find_movie(query))
+if __name__ == "__main__":
+    run(sys.argv[1:])
