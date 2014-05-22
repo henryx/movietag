@@ -15,20 +15,19 @@ import os
 import sys
 import urllib
 
+from contextlib import closing
 from sqlite3 import dbapi2 as sqlite
+
 
 class Database():
     _commit = None
     _conn = None
     _path = None
-
     def __init__(self, path, commit=True):
-        self._path = path
+        self._path = path + os.sep + ".movies.db"
         self._commit = commit
-
     def __enter__(self):
         return self
-
     def __exit__(self, exc_type, exc_val, exc_tb):
         try:
             if self._conn:
@@ -39,30 +38,53 @@ class Database():
                 self._conn.close()
         except:
             pass
-
-    def _check_database(self, connection):
-        cursor = connection.cursor()
+    def _check_database(self):
+        cursor = self._conn.cursor()
         cursor.execute("select count(*) from sqlite_master")
-
         value = cursor.fetchone()[0]
         cursor.close()
-
         if value == 0:
             return False
         else:
             return True
+    def _set_db_parameters(self):
+        pragmas = [
+            "PRAGMA synchronous=OFF",
+            "PRAGMA journal_mode=WAL",
+            "PRAGMA foreign_keys=ON"
+        ]
+        with closing(self._conn.cursor()) as cursor:
+            for item in pragmas:
+                cursor.execute(item)
+        self._conn.commit()
 
-    def _create_database(self, connection):
-        # TODO: write database schema
-        cursor = connection.cursor()
-        pass
+    def _create_database(self):
+        # TODO: add table for actors
+        tables = [
+            "CREATE TABLE movies(movieid, year, poster, PRIMARY KEY(movieid))",
+            "CREATE TABLE directors(movieid, name, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
+            "CREATE TABLE genres(movieid, genre, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
+            "CREATE TABLE titles(movieid, country, name, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
+            "CREATE TABLE locations(movieid, path, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
+        ]
+        with closing(self._conn.cursor()) as cursor:
+            for item in tables:
+                cursor.execute(item)
+        self._conn.commit()
 
     @property
     def connection(self):
         self._conn = sqlite.connect(self._path)
+        self._set_db_parameters()
+        if not self._check_database():
+            self._create_database()
+        return self._conn
 
-        if not self._check_database(self._conn):
-            self._create_database(self._conn)
+    @property
+    def connection(self):
+        self._conn = sqlite.connect(self._path)
+        if not self._check_database():
+            self._create_database()
         return self._conn
 
 def init_args():
