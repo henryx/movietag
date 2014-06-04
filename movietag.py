@@ -80,13 +80,6 @@ class Database():
             self._create_database()
         return self._conn
 
-    @property
-    def connection(self):
-        self._conn = sqlite.connect(self._path)
-        if not self._check_database():
-            self._create_database()
-        return self._conn
-
 def init_args():
     args = argparse.ArgumentParser(description="MovieTAG")
     args.add_argument("-r", "--root", metavar="<directory>",
