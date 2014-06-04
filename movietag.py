@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+# !/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -23,11 +23,14 @@ class Database():
     _commit = None
     _conn = None
     _path = None
+
     def __init__(self, path, commit=True):
         self._path = path + os.sep + ".movies.db"
         self._commit = commit
+
     def __enter__(self):
         return self
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         try:
             if self._conn:
@@ -38,15 +41,18 @@ class Database():
                 self._conn.close()
         except:
             pass
+
     def _check_database(self):
         cursor = self._conn.cursor()
         cursor.execute("select count(*) from sqlite_master")
         value = cursor.fetchone()[0]
         cursor.close()
+
         if value == 0:
             return False
         else:
             return True
+
     def _set_db_parameters(self):
         pragmas = [
             "PRAGMA synchronous=OFF",
@@ -67,6 +73,7 @@ class Database():
             "CREATE TABLE titles(movieid, country, name, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
             "CREATE TABLE locations(movieid, path, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
         ]
+
         with closing(self._conn.cursor()) as cursor:
             for item in tables:
                 cursor.execute(item)
@@ -76,6 +83,7 @@ class Database():
     def connection(self):
         self._conn = sqlite.connect(self._path)
         self._set_db_parameters()
+
         if not self._check_database():
             self._create_database()
         return self._conn
@@ -89,6 +97,7 @@ def init_args():
     args.add_argument("movie", metavar="movie", type=str,
                       help="Movie file")
     return args
+
 
 def check_structure(root):
     subdirs = [
@@ -104,6 +113,7 @@ def check_structure(root):
             os.makedirs(directory)
 
     return subdirs
+
 
 def find_movie(movie, actors="N", limit=1):
     """
@@ -133,19 +143,24 @@ def find_movie(movie, actors="N", limit=1):
 def save_movie_data(movie, path):
     with Database(path) as dbs, closing(dbs.connection.cursor()) as cur:
         # Add movie
-        cur.execute("INSERT INTO movies VALUES(?, ?, ?)", (movie["idIMDB"], movie["year"], movie["urlPoster"]))
+        cur.execute("INSERT INTO movies VALUES(?, ?, ?)",
+                    (movie["idIMDB"], movie["year"], movie["urlPoster"]))
 
         # Add directors
         for director in movie["directors"]:
-            cur.execute("INSERT INTO directors VALUES(?, ?, ?)", (movie["idIMDB"], director["nameId"], director["name"]))
+            cur.execute("INSERT INTO directors VALUES(?, ?, ?)",
+                        (movie["idIMDB"], director["nameId"], director["name"]))
 
         # Add genres
         for genre in movie["genres"]:
-            cur.execute("INSERT INTO genres VALUES(?, ?)", (movie["idIMDB"], genre))
+            cur.execute("INSERT INTO genres VALUES(?, ?)",
+                        (movie["idIMDB"], genre))
 
         # Add titles
         for title in movie["akas"]:
-            cur.execute("INSERT INTO titles VALUES(?, ?, ?)", (movie["idIMDB"], title["country"], title["title"]))
+            cur.execute("INSERT INTO titles VALUES(?, ?, ?)",
+                        (movie["idIMDB"], title["country"], title["title"]))
+
 
 def run(arguments):
     args = init_args().parse_args(arguments)
