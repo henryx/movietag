@@ -62,7 +62,7 @@ class Database():
         # TODO: add table for actors
         tables = [
             "CREATE TABLE movies(movieid, year, poster, PRIMARY KEY(movieid))",
-            "CREATE TABLE directors(movieid, name, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
+            "CREATE TABLE directors(movieid, directorid, name, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
             "CREATE TABLE genres(movieid, genre, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
             "CREATE TABLE titles(movieid, country, name, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
             "CREATE TABLE locations(movieid, path, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
@@ -137,6 +137,23 @@ def find_movie(movie, actors="N", limit=1):
 
     return json.loads(response.read().decode("utf-8"))
 
+def save_movie_data(movie, path):
+    with Database(path) as dbs, closing(dbs.connection.cursor()) as cur:
+        # Add movie
+        cur.execute("INSERT INTO movies VALUES(?, ?, ?)", (movie["idIMDB"], movie["year"], movie["urlPoster"]))
+
+        # Add directors
+        for director in movie["directors"]:
+            cur.execute("INSERT INTO directors VALUES(?, ?, ?)", (movie["idIMDB"], director["nameId"], director["name"]))
+
+        # Add genres
+        for genre in movie["genres"]:
+            cur.execute("INSERT INTO genres VALUES(?, ?)", (movie["idIMDB"], genre))
+
+        # Add titles
+        for title in movie["akas"]:
+            cur.execute("INSERT INTO titles VALUES(?, ?, ?)", (movie["idIMDB"], title["country"], title["title"]))
+
 def run(arguments):
     args = init_args().parse_args(arguments)
 
@@ -152,6 +169,9 @@ def run(arguments):
     else:
         query = args.query
 
-    print(find_movie(query))
+    movies = find_movie(query)
+    # NOTE: for now, only first result is saved
+    save_movie_data(movies[0], root)
+
 if __name__ == "__main__":
     run(sys.argv[1:])
