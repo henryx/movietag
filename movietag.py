@@ -99,16 +99,18 @@ def init_args():
 
 def check_structure(root):
     subdirs = [
-        "By Actor",
-        "By Director",
-        "By Name",
-        "By Genre",
-        "By Year"
+        root + os.sep + "By Actor",
+        root + os.sep + "By Director",
+        root + os.sep + "By Name",
+        root + os.sep + "By Genre",
+        root + os.sep + "By Year"
     ]
 
     for directory in subdirs:
-        if not os.path.isdir(root + os.sep + directory):
-            os.makedirs(root + os.sep + directory)
+        if not os.path.isdir(directory):
+            os.makedirs(directory)
+
+    return subdirs
 
 def find_movie(movie, actors="N", limit=1):
     """
@@ -143,7 +145,7 @@ def run(arguments):
     else:
         root = args.root
 
-    check_structure(root)
+    paths = check_structure(root)
 
     if not args.query:
         query = input("Movie to search: ")
