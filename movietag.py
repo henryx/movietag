@@ -144,34 +144,40 @@ def find_movie(movie, actors="N", limit=1):
 
 def save_movie_data(movie, path):
     with Database(path) as dbs, closing(dbs.connection.cursor()) as cur:
-        # Add movie
-        cur.execute("INSERT INTO movies VALUES(?, ?, ?)",
-                    (movie["idIMDB"], movie["year"], movie["urlPoster"]))
+        cur.execute("SELECT count(movieid) FROM movies WHERE movieid = ?", (movie["idIMDB"],))
+        counted = cur.fetchone()[0]
 
-        # Add directors
-        for director in movie["directors"]:
-            cur.execute("INSERT INTO peoples VALUES(?, ?)",
-                        (director["nameId"], director["name"]))
-            cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
-                        (movie["idIMDB"], director["nameId"], "director"))
+        if counted > 0:
+            print("Movie already in collection")
+            sys.exit(0)
+        else:
+            # Add movie
+            cur.execute("INSERT INTO movies VALUES(?, ?, ?)",
+                        (movie["idIMDB"], movie["year"], movie["urlPoster"]))
 
-        # Add directors
-        for actor in movie["actors"]:
-            cur.execute("INSERT INTO peoples VALUES(?, ?)",
-                        (actor["actorId"], actor["actorName"]))
-            cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
-                        (movie["idIMDB"], actor["actorId"], "actor"))
+            # Add directors
+            for director in movie["directors"]:
+                cur.execute("INSERT INTO peoples VALUES(?, ?)",
+                            (director["nameId"], director["name"]))
+                cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
+                            (movie["idIMDB"], director["nameId"], "director"))
 
-        # Add genres
-        for genre in movie["genres"]:
-            cur.execute("INSERT INTO genres VALUES(?, ?)",
-                        (movie["idIMDB"], genre))
+            # Add directors
+            for actor in movie["actors"]:
+                cur.execute("INSERT INTO peoples VALUES(?, ?)",
+                            (actor["actorId"], actor["actorName"]))
+                cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
+                            (movie["idIMDB"], actor["actorId"], "actor"))
 
-        # Add titles
-        for title in movie["akas"]:
-            cur.execute("INSERT INTO titles VALUES(?, ?, ?)",
-                        (movie["idIMDB"], title["country"], title["title"]))
+            # Add genres
+            for genre in movie["genres"]:
+                cur.execute("INSERT INTO genres VALUES(?, ?)",
+                            (movie["idIMDB"], genre))
 
+            # Add titles
+            for title in movie["akas"]:
+                cur.execute("INSERT INTO titles VALUES(?, ?, ?)",
+                            (movie["idIMDB"], title["country"], title["title"]))
 
 def run(arguments):
     args = init_args().parse_args(arguments)
