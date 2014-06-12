@@ -68,7 +68,8 @@ class Database():
         # TODO: add table for actors
         tables = [
             "CREATE TABLE movies(movieid, year, poster, PRIMARY KEY(movieid))",
-            "CREATE TABLE directors(movieid, directorid, name, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
+            "CREATE TABLE peoples(peopleid, name, PRIMARY KEY(peopleid))",
+            "CREATE TABLE peoples_movies(movieid, peopleid, role, FOREIGN KEY(movieid) REFERENCES movies(movieid), FOREIGN KEY(peopleid) REFERENCES peoples(peopleid))",
             "CREATE TABLE genres(movieid, genre, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
             "CREATE TABLE titles(movieid, country, name, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
             "CREATE TABLE locations(movieid, path, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
@@ -101,6 +102,7 @@ def init_args():
 
 def check_structure(root):
     subdirs = [
+        root + os.sep,
         root + os.sep + "By Actor",
         root + os.sep + "By Director",
         root + os.sep + "By Name",
@@ -148,8 +150,17 @@ def save_movie_data(movie, path):
 
         # Add directors
         for director in movie["directors"]:
-            cur.execute("INSERT INTO directors VALUES(?, ?, ?)",
-                        (movie["idIMDB"], director["nameId"], director["name"]))
+            cur.execute("INSERT INTO peoples VALUES(?, ?)",
+                        (director["nameId"], director["name"]))
+            cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
+                        (movie["idIMDB"], director["nameId"], "director"))
+
+        # Add directors
+        for actor in movie["actors"]:
+            cur.execute("INSERT INTO peoples VALUES(?, ?)",
+                        (actor["actorId"], actor["actorName"]))
+            cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
+                        (movie["idIMDB"], actor["actorId"], "actor"))
 
         # Add genres
         for genre in movie["genres"]:
@@ -177,9 +188,11 @@ def run(arguments):
     else:
         query = args.query
 
-    movies = find_movie(query)
+    # For now, simple actor list is used
+    movies = find_movie(query, actors="S")
+
     # NOTE: for now, only first result is saved
-    save_movie_data(movies[0], root)
+    save_movie_data(movies[0], paths[0])
 
 if __name__ == "__main__":
     run(sys.argv[1:])
