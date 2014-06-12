@@ -179,6 +179,42 @@ def save_movie_data(movie, path):
                 cur.execute("INSERT INTO titles VALUES(?, ?, ?)",
                             (movie["idIMDB"], title["country"], title["title"]))
 
+def save_movie_path(filename, movie, paths):
+    # TODO: add code for link the filename
+    with Database(paths[0]) as dbs, closing(dbs.connection.cursor()) as cur:
+        # Actors and Directors
+        roles = ["actor", "director"]
+        pointer = 0
+        for role in roles:
+            pointer += 1
+            cur.execute("SELECT peoples.name FROM peoples, peoples_movies"
+                        " WHERE peoples.peopleid = peoples_movies.peopleid"
+                        " AND peoples_movies.role = ? AND peoples_movies.movieid = ?",
+                        (role, movie["idIMDB"]))
+
+            for location in cur.fetchall():
+                dest = paths[pointer] + os.sep + location[0]
+                if not os.path.isdir(dest):
+                    os.makedirs(dest)
+
+        # TODO: add code for locate filename by movie name
+
+        # Genre
+        cur.execute("SELECT genre FROM genres WHERE movieid = ?", (movie["idIMDB"],))
+        for location in cur.fetchall():
+            dest = paths[4] + os.sep + location[0]
+            if not os.path.isdir(dest):
+                os.makedirs(dest)
+
+        # Year
+        cur.execute("SELECT year FROM movies where movieid = ?", (movie["idIMDB"],))
+        for location in cur.fetchall():
+            dest = paths[5] + os.sep + location[0]
+            if not os.path.isdir(dest):
+                os.makedirs(dest)
+
+    # TODO: add code for remove old filename
+
 def run(arguments):
     args = init_args().parse_args(arguments)
 
@@ -199,6 +235,7 @@ def run(arguments):
 
     # NOTE: for now, only first result is saved
     save_movie_data(movies[0], paths[0])
+    save_movie_path(args.movie, movies[0], paths)
 
 if __name__ == "__main__":
     run(sys.argv[1:])
