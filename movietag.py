@@ -67,11 +67,10 @@ class Database():
     def _create_database(self):
         # TODO: add table for actors
         tables = [
-            "CREATE TABLE movies(movieid, year, poster, PRIMARY KEY(movieid))",
+            "CREATE TABLE movies(movieid, title, year, poster, PRIMARY KEY(movieid))",
             "CREATE TABLE peoples(peopleid, name, PRIMARY KEY(peopleid))",
             "CREATE TABLE peoples_movies(movieid, peopleid, role, FOREIGN KEY(movieid) REFERENCES movies(movieid), FOREIGN KEY(peopleid) REFERENCES peoples(peopleid))",
             "CREATE TABLE genres(movieid, genre, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
-            "CREATE TABLE titles(movieid, country, name, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
             "CREATE TABLE locations(movieid, path, FOREIGN KEY(movieid) REFERENCES movies(movieid))",
         ]
 
@@ -117,7 +116,6 @@ def check_structure(root):
 
     return subdirs
 
-
 def find_movie(movie, actors="N", limit=1):
     """
         Values:
@@ -152,9 +150,15 @@ def save_movie_data(movie, path, country):
             print("Movie already in collection")
             sys.exit(0)
         else:
+            # Get the title
+            for item in movie["akas"]:
+                if item["country"].lower() == country.lower():
+                    title = item["title"]
+                    break
+
             # Add movie
-            cur.execute("INSERT INTO movies VALUES(?, ?, ?)",
-                        (movie["idIMDB"], movie["year"], movie["urlPoster"]))
+            cur.execute("INSERT INTO movies VALUES(?, ?, ?, ?)",
+                        (movie["idIMDB"], title, movie["year"], movie["urlPoster"]))
 
             # Add directors
             for director in movie["directors"]:
@@ -174,11 +178,6 @@ def save_movie_data(movie, path, country):
             for genre in movie["genres"]:
                 cur.execute("INSERT INTO genres VALUES(?, ?)",
                             (movie["idIMDB"], genre))
-
-            # Add titles
-            for title in movie["akas"]:
-                cur.execute("INSERT INTO titles VALUES(?, ?, ?)",
-                            (movie["idIMDB"], title["country"], title["title"]))
 
 def save_movie_path(filename, movie, paths):
     # TODO: add code for link the filename
