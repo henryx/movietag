@@ -180,8 +180,13 @@ def save_movie_data(movie, path, country):
                             (movie["idIMDB"], genre))
 
 def save_movie_path(filename, movie, paths):
-    # TODO: add code for link the filename
     with Database(paths[0]) as dbs, closing(dbs.connection.cursor()) as cur:
+        # Get title and year
+        cur.execute("SELECT title, year FROM movies where movieid = ?", (movie["idIMDB"],))
+        data = cur.fetchone()
+
+        destfile = data[0] + "." + filename.split(".")[-1]
+
         # Actors and Directors
         roles = ["actor", "director"]
         pointer = 0
@@ -196,8 +201,13 @@ def save_movie_path(filename, movie, paths):
                 dest = paths[pointer] + os.sep + location[0]
                 if not os.path.isdir(dest):
                     os.makedirs(dest)
+                os.link(filename, dest + os.sep + destfile)
 
-        # TODO: add code for locate filename by movie name
+        # Title
+        dest = paths[3] + os.sep + data[0][0]
+        if not os.path.isdir(dest):
+            os.makedirs(dest)
+        os.link(filename, dest + os.sep + destfile)
 
         # Genre
         cur.execute("SELECT genre FROM genres WHERE movieid = ?", (movie["idIMDB"],))
@@ -205,15 +215,15 @@ def save_movie_path(filename, movie, paths):
             dest = paths[4] + os.sep + location[0]
             if not os.path.isdir(dest):
                 os.makedirs(dest)
+            os.link(filename, dest + os.sep + destfile)
 
         # Year
-        cur.execute("SELECT year FROM movies where movieid = ?", (movie["idIMDB"],))
-        for location in cur.fetchall():
-            dest = paths[5] + os.sep + location[0]
-            if not os.path.isdir(dest):
-                os.makedirs(dest)
+        dest = paths[5] + os.sep + data[1]
+        if not os.path.isdir(dest):
+            os.makedirs(dest)
+        os.link(filename, dest + os.sep + destfile)
 
-    # TODO: add code for remove old filename
+    os.remove(filename)
 
 def run(arguments):
     args = init_args().parse_args(arguments)
