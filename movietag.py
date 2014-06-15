@@ -95,10 +95,11 @@ def init_args():
                       help="Define root directory")
     args.add_argument("-q", "--query", metavar="<search>",
                       help="Movie to search")
+    args.add_argument("-c", "--country", metavar="<country>", default="(original title)",
+                      help="Title used in country (default the original title)")
     args.add_argument("movie", metavar="movie", type=str,
                       help="Movie file")
     return args
-
 
 def check_structure(root):
     subdirs = [
@@ -142,7 +143,7 @@ def find_movie(movie, actors="N", limit=1):
 
     return json.loads(response.read().decode("utf-8"))
 
-def save_movie_data(movie, path):
+def save_movie_data(movie, path, country):
     with Database(path) as dbs, closing(dbs.connection.cursor()) as cur:
         cur.execute("SELECT count(movieid) FROM movies WHERE movieid = ?", (movie["idIMDB"],))
         counted = cur.fetchone()[0]
@@ -234,7 +235,7 @@ def run(arguments):
     movies = find_movie(query, actors="S")
 
     # NOTE: for now, only first result is saved
-    save_movie_data(movies[0], paths[0])
+    save_movie_data(movies[0], paths[0], args.country)
     save_movie_path(args.movie, movies[0], paths)
 
 if __name__ == "__main__":
