@@ -92,12 +92,17 @@ def init_args():
     args = argparse.ArgumentParser(description="MovieTAG")
     args.add_argument("-r", "--root", metavar="<directory>",
                       help="Define root directory")
-    args.add_argument("-q", "--query", metavar="<search>",
-                      help="Movie to search")
     args.add_argument("-c", "--country", metavar="<country>", default="(original title)",
                       help="Title used in country (default the original title)")
-    args.add_argument("movie", metavar="movie", type=str,
-                      help="Movie file")
+
+    group = args.add_mutually_exclusive_group(required=True)
+
+    group.add_argument("-q", "--query", metavar="<movie>",
+                      help="Search movie")
+    group.add_argument("-d", "--remove", metavar="<movie>",
+                      help="Remove movie")
+    group.add_argument("-a", "--add", metavar="<movie>", type=str,
+                      help="Add movie")
     return args
 
 def check_structure(root):
@@ -243,17 +248,23 @@ def run(arguments):
 
     paths = check_structure(root)
 
-    if not args.query:
+    if args.add:
         query = input("Movie to search: ")
-    else:
-        query = args.query
 
-    # For now, simple actor list is used
-    movies = find_movie(query, actors="S")
+        # For now, simple actor list is used
+        movies = find_movie(query, actors="S")
 
-    # NOTE: for now, only first result is saved
-    save_movie_data(movies[0], paths[0], args.country)
-    save_movie_path(args.movie, movies[0], paths)
+        # NOTE: for now, only first result is saved
+        save_movie_data(movies[0], paths[0], args.country)
+        save_movie_path(args.movie, movies[0], paths)
+
+    if args.query:
+        # TODO: Add search in database
+        pass
+
+    if args.remove:
+        # TODO: Add remove from collection
+        pass
 
 if __name__ == "__main__":
     run(sys.argv[1:])
