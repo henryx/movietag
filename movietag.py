@@ -251,6 +251,7 @@ def run(arguments):
     if args.add:
         query = input("Movie to search: ")
 
+        # TODO: extract more results and choice the correct value
         # For now, simple actor list is used
         movies = find_movie(query, actors="S")
 
