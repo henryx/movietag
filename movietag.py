@@ -144,7 +144,7 @@ def find_movie(movie, actors="N", limit=1):
     connection.request("GET", "/search?" + params)
     response = connection.getresponse()
 
-    return json.loads(response.read().decode("utf-8"))
+    return json.loads(response.read().decode("utf-8").replace("\\\\", "\\"))
 
 def save_movie_data(movie, path, country):
     with Database(path) as dbs, closing(dbs.connection.cursor()) as cur:
