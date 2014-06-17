@@ -257,7 +257,7 @@ def run(arguments):
 
         # NOTE: for now, only first result is saved
         save_movie_data(movies[0], paths[0], args.country)
-        save_movie_path(args.movie, movies[0], paths)
+        save_movie_path(args.add, movies[0], paths)
 
     if args.query:
         # TODO: Add search in database
