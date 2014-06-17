@@ -221,7 +221,7 @@ def save_movie_path(filename, movie, paths):
                 add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
 
         # Title
-        dest = paths[3] + os.sep + data[0][0]
+        dest = paths[3] + os.sep + data[0][0].lower()
         if not os.path.isdir(dest):
             os.makedirs(dest)
         os.link(filename, dest + os.sep + destfile)
