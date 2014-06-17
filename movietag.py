@@ -193,6 +193,9 @@ def save_movie_data(movie, path, country):
                             (movie["idIMDB"], genre))
 
 def save_movie_path(filename, movie, paths):
+    def add_location(cur, movieid, path):
+        cur.execute("INSERT INTO locations VALUES(?, ?)", (movieid, path))
+
     with Database(paths[0]) as dbs, closing(dbs.connection.cursor()) as cur:
         # Get title and year
         cur.execute("SELECT title, year FROM movies where movieid = ?", (movie["idIMDB"],))
@@ -215,12 +218,14 @@ def save_movie_path(filename, movie, paths):
                 if not os.path.isdir(dest):
                     os.makedirs(dest)
                 os.link(filename, dest + os.sep + destfile)
+                add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
 
         # Title
         dest = paths[3] + os.sep + data[0][0]
         if not os.path.isdir(dest):
             os.makedirs(dest)
         os.link(filename, dest + os.sep + destfile)
+        add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
 
         # Genre
         cur.execute("SELECT genre FROM genres WHERE movieid = ?", (movie["idIMDB"],))
@@ -229,12 +234,14 @@ def save_movie_path(filename, movie, paths):
             if not os.path.isdir(dest):
                 os.makedirs(dest)
             os.link(filename, dest + os.sep + destfile)
+            add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
 
         # Year
         dest = paths[5] + os.sep + data[1]
         if not os.path.isdir(dest):
             os.makedirs(dest)
         os.link(filename, dest + os.sep + destfile)
+        add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
 
     os.remove(filename)
 
