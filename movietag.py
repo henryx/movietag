@@ -155,6 +155,9 @@ def save_movie_data(movie, path, country):
             sys.exit(0)
         else:
             # Get the title
+            title = movie["title"]
+
+            # Check if exist a translated title
             for item in movie["akas"]:
                 if item["country"].lower() == country.lower():
                     title = item["title"]
@@ -175,7 +178,7 @@ def save_movie_data(movie, path, country):
                     cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
                                 (movie["idIMDB"], director["nameId"], "director"))
 
-            # Add directors
+            # Add actors
             for actor in movie["actors"]:
                 cur.execute("SELECT count(peopleid) FROM peoples WHERE peopleid = ?", (actor["actorId"],))
                 counted = cur.fetchone()[0]
