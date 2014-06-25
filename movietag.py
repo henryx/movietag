@@ -121,7 +121,7 @@ def check_structure(root):
 
     return subdirs
 
-def find_movie(movie, actors="N", limit=1):
+def find_movie(movie, actors="N", limit=10):
     """
         Values:
             "movie": search movie
@@ -260,11 +260,13 @@ def run(arguments):
 
         # TODO: extract more results and choice the correct value
         # For now, simple actor list is used
-        movies = find_movie(query, actors="S")
 
-        # NOTE: for now, only first result is saved
-        save_movie_data(movies[0], paths[0], args.country)
-        save_movie_path(args.add, movies[0], paths)
+        for movie in find_movie(query, actors="S"):
+            selected = input('Is "' + movie["title"] + '" (y/N)? ')
+
+            if not selected == "" and selected[0].lower() == 'y':
+                save_movie_data(movie, paths[0], args.country)
+                save_movie_path(args.add, movie, paths)
 
     if args.query:
         # TODO: Add search in database
