@@ -65,7 +65,6 @@ class Database():
         self._conn.commit()
 
     def _create_database(self):
-        # TODO: add table for actors
         tables = [
             "CREATE TABLE movies(movieid, title, year, poster, PRIMARY KEY(movieid))",
             "CREATE TABLE peoples(peopleid, name, PRIMARY KEY(peopleid))",
@@ -256,6 +255,10 @@ def run(arguments):
     paths = check_structure(root)
 
     if args.add:
+        if not os.path.exists(args.add):
+            print("File does not exists")
+            sys.exit(1)
+
         query = input("Movie to search: ")
 
         # TODO: extract more results and choice the correct value
