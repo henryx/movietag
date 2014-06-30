@@ -158,8 +158,16 @@ def get_movie_title(movie, country):
 
     return title
 
-def save_movie_data(movie, path, country):
-    with Database(path) as dbs, closing(dbs.connection.cursor()) as cur:
+def save_movie(filename, movie, paths, country):
+    def add_location(cur, movieid, path):
+        cur.execute("INSERT INTO locations VALUES(?, ?)", (movieid, path))
+
+    def link_file(source, dest, destfile):
+        if not os.path.isdir(dest):
+            os.makedirs(dest)
+        os.link(source, dest + os.sep + destfile)
+
+    with Database(paths[0]) as dbs, closing(dbs.connection.cursor()) as cur:
         cur.execute("SELECT count(movieid) FROM movies WHERE movieid = ?", (movie["idIMDB"],))
         counted = cur.fetchone()[0]
 
@@ -167,11 +175,20 @@ def save_movie_data(movie, path, country):
             print("Movie already in collection")
             sys.exit(0)
 
+        # Add movie
         title = get_movie_title(movie, country)
 
-        # Add movie
+        destfile = title + "." + filename.split(".")[-1]
         cur.execute("INSERT INTO movies VALUES(?, ?, ?, ?)",
                     (movie["idIMDB"], title, movie["year"], movie["urlPoster"]))
+        dest = paths[3] + os.sep + title[0].lower()
+        link_file(filename, dest, destfile)
+        add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
+
+        dest = paths[5] + os.sep + movie["year"]
+        link_file(filename, dest, destfile)
+        add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
+
 
         # Add directors
         for director in movie["directors"]:
@@ -184,6 +201,10 @@ def save_movie_data(movie, path, country):
                 cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
                             (movie["idIMDB"], director["nameId"], "director"))
 
+                dest = paths[2] + os.sep + director["name"]
+                link_file(filename, dest, destfile)
+                add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
+
         # Add actors
         for actor in movie["actors"]:
             cur.execute("SELECT count(peopleid) FROM peoples WHERE peopleid = ?", (actor["actorId"],))
@@ -194,62 +215,17 @@ def save_movie_data(movie, path, country):
                             (actor["actorId"], actor["actorName"]))
                 cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
                             (movie["idIMDB"], actor["actorId"], "actor"))
+                dest = paths[1] + os.sep + actor["actorName"]
+                link_file(filename, dest, destfile)
+                add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
 
         # Add genres
         for genre in movie["genres"]:
             cur.execute("INSERT INTO genres VALUES(?, ?)",
                         (movie["idIMDB"], genre))
-
-def save_movie_path(filename, movie, paths):
-    def add_location(cur, movieid, path):
-        cur.execute("INSERT INTO locations VALUES(?, ?)", (movieid, path))
-
-    with Database(paths[0]) as dbs, closing(dbs.connection.cursor()) as cur:
-        # Get title and year
-        cur.execute("SELECT title, year FROM movies where movieid = ?", (movie["idIMDB"],))
-        data = cur.fetchone()
-
-        destfile = data[0] + "." + filename.split(".")[-1]
-
-        # Actors and Directors
-        roles = ["actor", "director"]
-        pointer = 0
-        for role in roles:
-            pointer += 1
-            cur.execute("SELECT peoples.name FROM peoples, peoples_movies"
-                        " WHERE peoples.peopleid = peoples_movies.peopleid"
-                        " AND peoples_movies.role = ? AND peoples_movies.movieid = ?",
-                        (role, movie["idIMDB"]))
-
-            for location in cur.fetchall():
-                dest = paths[pointer] + os.sep + location[0]
-                if not os.path.isdir(dest):
-                    os.makedirs(dest)
-                os.link(filename, dest + os.sep + destfile)
-                add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
-
-        # Title
-        dest = paths[3] + os.sep + data[0][0].lower()
-        if not os.path.isdir(dest):
-            os.makedirs(dest)
-        os.link(filename, dest + os.sep + destfile)
-        add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
-
-        # Genre
-        cur.execute("SELECT genre FROM genres WHERE movieid = ?", (movie["idIMDB"],))
-        for location in cur.fetchall():
-            dest = paths[4] + os.sep + location[0]
-            if not os.path.isdir(dest):
-                os.makedirs(dest)
-            os.link(filename, dest + os.sep + destfile)
+            dest = paths[4] + os.sep + genre
+            link_file(filename, dest, destfile)
             add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
-
-        # Year
-        dest = paths[5] + os.sep + data[1]
-        if not os.path.isdir(dest):
-            os.makedirs(dest)
-        os.link(filename, dest + os.sep + destfile)
-        add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
 
     os.remove(filename)
 
@@ -277,8 +253,7 @@ def run(arguments):
             selected = input('Is "' + get_movie_title(movie, args.country) + '" (y/N)? ')
 
             if not selected == "" and selected[0].lower() == 'y':
-                save_movie_data(movie, paths[0], args.country)
-                save_movie_path(args.add, movie, paths)
+                save_movie(args.add, movie, paths, args.country)
 
     if args.query:
         # TODO: Add search in database
