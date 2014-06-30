@@ -255,6 +255,8 @@ def run(arguments):
             if not selected == "" and selected[0].lower() == 'y':
                 save_movie(args.add, movie, paths, args.country)
                 break
+        else:
+            print("No movie selected")
 
     if args.query:
         # TODO: Add search in database
