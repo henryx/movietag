@@ -145,6 +145,19 @@ def find_movie(movie, actors="N", limit=10):
 
     return json.loads(response.read().decode("utf-8").replace("\\\\", "\\"))
 
+def get_movie_title(movie, country):
+    # Get the title
+    title = movie["title"]
+
+    # Check if exist a translated title
+    if "akas" in movie:
+        for item in movie["akas"]:
+            if item["country"].lower() == country.lower():
+                title = item["title"]
+                break
+
+    return title
+
 def save_movie_data(movie, path, country):
     with Database(path) as dbs, closing(dbs.connection.cursor()) as cur:
         cur.execute("SELECT count(movieid) FROM movies WHERE movieid = ?", (movie["idIMDB"],))
@@ -154,14 +167,7 @@ def save_movie_data(movie, path, country):
             print("Movie already in collection")
             sys.exit(0)
         else:
-            # Get the title
-            title = movie["title"]
-
-            # Check if exist a translated title
-            for item in movie["akas"]:
-                if item["country"].lower() == country.lower():
-                    title = item["title"]
-                    break
+            title = get_movie_title(movie, country)
 
             # Add movie
             cur.execute("INSERT INTO movies VALUES(?, ?, ?, ?)",
@@ -268,7 +274,7 @@ def run(arguments):
         # For now, simple actor list is used
 
         for movie in find_movie(query, actors="S"):
-            selected = input('Is "' + movie["title"] + '" (y/N)? ')
+            selected = input('Is "' + get_movie_title(movie, args.country) + '" (y/N)? ')
 
             if not selected == "" and selected[0].lower() == 'y':
                 save_movie_data(movie, paths[0], args.country)
