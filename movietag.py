@@ -199,12 +199,12 @@ def save_movie(filename, movie, paths, country):
             if counted == 0:
                 cur.execute("INSERT INTO peoples VALUES(?, ?)",
                             (director["nameId"], director["name"]))
-                cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
-                            (movie["idIMDB"], director["nameId"], "director"))
 
-                dest = paths[2] + os.sep + director["name"]
-                link_file(filename, dest, destfile)
-                add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
+            cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
+                        (movie["idIMDB"], director["nameId"], "director"))
+            dest = paths[2] + os.sep + director["name"]
+            link_file(filename, dest, destfile)
+            add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
 
         # Add actors
         for actor in movie["actors"]:
@@ -214,11 +214,12 @@ def save_movie(filename, movie, paths, country):
             if counted == 0:
                 cur.execute("INSERT INTO peoples VALUES(?, ?)",
                             (actor["actorId"], actor["actorName"]))
-                cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
-                            (movie["idIMDB"], actor["actorId"], "actor"))
-                dest = paths[1] + os.sep + actor["actorName"]
-                link_file(filename, dest, destfile)
-                add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
+
+            cur.execute("INSERT INTO peoples_movies VALUES(?, ?, ?)",
+                        (movie["idIMDB"], actor["actorId"], "actor"))
+            dest = paths[1] + os.sep + actor["actorName"]
+            link_file(filename, dest, destfile)
+            add_location(cur, movie["idIMDB"], dest + os.sep + destfile)
 
         # Add genres
         for genre in movie["genres"]:
