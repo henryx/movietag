@@ -248,11 +248,11 @@ def run(arguments):
 
         query = input("Movie to search: ")
 
-        # TODO: extract more results and choice the correct value
         # For now, simple actor list is used
-
         for movie in find_movie(query, actors="S"):
-            selected = input('Is "' + get_movie_title(movie, args.country) + '" (y/N)? ')
+            selected = input('Is "' + get_movie_title(movie, args.country) +
+                             ' (' + movie["directors"][0]["name"] + " - " +
+                             movie["year"] + ')" (y/N)? ')
 
             if not selected == "" and selected[0].lower() == 'y':
                 save_movie(args.add, movie, paths, args.country)
