@@ -144,7 +144,11 @@ def find_movie(movie, actors="N", limit=10):
     connection.request("GET", "/search?" + params)
     response = connection.getresponse()
 
-    return json.loads(response.read().decode("utf-8").replace("\\\\", "\\"))
+    if response.status == 200:
+        return json.loads(response.read().decode("utf-8").replace("\\\\", "\\"))
+    else:
+        print("Service not available")
+        sys.exit(1)
 
 def get_movie_title(movie, country):
     # Get the title
@@ -164,6 +168,7 @@ def save_movie(filename, movie, paths, country):
         cur.execute("INSERT INTO locations VALUES(?, ?)", (movieid, path))
 
     def link_file(source, dest, destfile):
+        # FIXME: if movie is in another partition, link fails
         if not os.path.isdir(dest):
             os.makedirs(dest)
         os.link(source, dest + os.sep + destfile)
