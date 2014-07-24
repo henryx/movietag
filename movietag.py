@@ -253,9 +253,14 @@ def run(arguments):
 
         # For now, simple actor list is used
         for movie in find_movie(query, actors="S"):
-            selected = input('Is "' + get_movie_title(movie, args.country) +
-                             ' (' + movie["directors"][0]["name"] + " - " +
-                             movie["year"] + ')" (y/N)? ')
+            if len(movie["directors"]) == 0:
+                message = "".join(['Is "', get_movie_title(movie, args.country),
+                                 ' (', movie["year"], ')" (y/N)? '])
+            else:
+                message = "".join(['Is "', get_movie_title(movie, args.country),
+                                 ' (',  movie["directors"][0]["name"], " - ",
+                                 movie["year"], ')" (y/N)? '])
+            selected = input(message)
 
             if not selected == "" and selected[0].lower() == 'y':
                 save_movie(filename, movie, paths, args.country)
