@@ -12,12 +12,12 @@ import argparse
 import http.client
 import json
 import os
+import shutil
 import sys
 import urllib
 
 from contextlib import closing
 from sqlite3 import dbapi2 as sqlite
-
 
 class Database():
     _commit = None
@@ -168,7 +168,6 @@ def save_movie(filename, movie, paths, country):
         cur.execute("INSERT INTO locations VALUES(?, ?)", (movieid, path))
 
     def link_file(source, dest, destfile):
-        # FIXME: if movie is in another partition, link fails
         if not os.path.isdir(dest):
             os.makedirs(dest)
         os.link(source, dest + os.sep + destfile)
@@ -246,6 +245,10 @@ def run(arguments):
             print("File does not exists")
             sys.exit(1)
 
+        # Move file to the root of the collection
+        filename = paths[0] + os.sep + os.path.basename(args.add)
+        shutil.move(args.add, filename)
+
         query = input("Movie to search: ")
 
         # For now, simple actor list is used
@@ -255,7 +258,7 @@ def run(arguments):
                              movie["year"] + ')" (y/N)? ')
 
             if not selected == "" and selected[0].lower() == 'y':
-                save_movie(args.add, movie, paths, args.country)
+                save_movie(filename, movie, paths, args.country)
                 break
         else:
             print("No movie selected")
