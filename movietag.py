@@ -13,6 +13,7 @@ import http.client
 import json
 import os
 import shutil
+import socket
 import sys
 import urllib
 
@@ -141,14 +142,18 @@ def find_movie(movie, actors="N", limit=10):
     params = urllib.parse.urlencode(data)
     connection = http.client.HTTPConnection(url)
 
-    connection.request("GET", "/search?" + params)
-    response = connection.getresponse()
+    try:
+        connection.request("GET", "/search?" + params)
+        response = connection.getresponse()
 
-    if response.status == 200:
-        return json.loads(response.read().decode("utf-8").replace("\\\\", "\\"))
-    else:
-        print("Service not available")
-        sys.exit(1)
+        if response.status == 200:
+            return json.loads(response.read().decode("utf-8").replace("\\\\", "\\"))
+        else:
+            print("Service not available")
+            sys.exit(1)
+    except socket.gaierror as e:
+        print(e)
+        sys.exit(2)
 
 def get_movie_title(movie, country):
     # Get the title
