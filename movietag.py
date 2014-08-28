@@ -143,7 +143,7 @@ def find_movie(movie, actors="N", limit=10):
     connection = http.client.HTTPConnection(url)
 
     try:
-        connection.request("GET", "/search?" + params)
+        connection.request("GET", "/imdb?" + params)
         response = connection.getresponse()
 
         if response.status == 200:
