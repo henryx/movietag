@@ -92,7 +92,7 @@ def init_args():
     args = argparse.ArgumentParser(description="MovieTAG")
     args.add_argument("-r", "--root", metavar="<directory>",
                       default=os.path.sep.join([os.path.expanduser('~'), "Videos"]),
-                      help="Define root directory")
+                      help="Define root directory (default ~/Videos)")
     args.add_argument("-c", "--country", metavar="<country>", default="(original title)",
                       help="Title used in country (default the original title)")
 
