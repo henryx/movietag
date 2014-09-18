@@ -122,7 +122,7 @@ def check_structure(root):
 
     return subdirs
 
-def find_movie(movie, actors="N", limit=10):
+def find_movie(id=None, movie=None, actors="N", limit=10):
     """
         Values:
             "movie": search movie
@@ -134,10 +134,18 @@ def find_movie(movie, actors="N", limit=10):
     data = {
         "format": "JSON",
         "aka": 1,
-        "title": movie,
         "actors": actors,
         "limit": limit
     }
+
+    if not movie or not id:
+        raise AttributeError("title or IMDB id not inserted")
+
+    if movie:
+        data["title"] = movie
+
+    if id:
+        data["idIMDB"] = id
 
     params = urllib.parse.urlencode(data)
     connection = http.client.HTTPConnection(url)
@@ -257,7 +265,7 @@ def run(arguments):
         query = input("Movie to search: ")
 
         # For now, simple actor list is used
-        for movie in find_movie(query, actors="S"):
+        for movie in find_movie(movie=query, actors="S"):
             if len(movie["directors"]) == 0:
                 message = "".join(['Is "', get_movie_title(movie, args.country),
                                  ' (', movie["year"], ')" (y/N)? '])
