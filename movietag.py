@@ -138,7 +138,7 @@ def find_movie(id=None, movie=None, actors="N", limit=10):
         "limit": limit
     }
 
-    if not movie or not id:
+    if not (movie or id):
         raise AttributeError("title or IMDB id not inserted")
 
     if movie:
